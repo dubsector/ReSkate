@@ -202,9 +202,10 @@ UpdateCheck check_for_update() {
     UpdateCheck check;
     try {
         std::optional<LinuxRelease> found;
-        if (const char *local = std::getenv("RESKATE_LAUNCHER_CONFIG_FILE"); local && *local) {
-            // Test an unpublished config before attaching it to a release, as the launcher can.
-            // Its links must be whole HTTPS ones: there is no release to find an "asset:" in.
+        const char *local = std::getenv("RESKATE_LAUNCHER_CONFIG_FILE");
+        if (local && *local && !launcher_update::launcher_binary_updates) {
+            // Test an unpublished config before attaching it to a release, as the launcher can (local
+            // builds only). Its links must be whole HTTPS ones: there is no release to find an "asset:" in.
             std::ifstream input(local, std::ios::binary);
             const std::string text{std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
             if (!input && !input.eof()) throw std::runtime_error(std::string("cannot read ") + local);

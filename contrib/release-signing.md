@@ -42,3 +42,6 @@ one. Keep a backup of the secret key and its password.
    `launcher.json` afterwards, even its whitespace, means signing it again.
 
 The dedicated server (Windows and Linux) checks the same signature before it updates itself.
+
+To try a config before it is attached, point `RESKATE_LAUNCHER_CONFIG_FILE` at it and run a local
+build. Release builds ignore that variable and read only the release's own `launcher.json`.
