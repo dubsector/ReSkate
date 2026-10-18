@@ -4,6 +4,7 @@
 #include "Engine/Core/Log/logging.h"
 #include "Engine/Core/Debug/trace.h"
 #include "Engine/Core/Platform/launcher_support.h"
+#include "Engine/Core/Platform/release_signature.h"
 #include "launcher_update_config.h"
 #include "text_encoding.h"
 #include "Engine/Core/Platform/path_text.h"
@@ -386,6 +387,10 @@ std::optional<Config> fetch_config(bool prereleases) {
             std::ifstream input(path, std::ios::binary);
             const std::string text{std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
             if (!input && !input.eof()) fail("Cannot read " + utf8(path.wstring()));
+            std::optional<std::string> signature;
+            if (std::ifstream sig(fs::path(path.wstring() + L".minisig"), std::ios::binary); sig)
+                signature.emplace(std::istreambuf_iterator<char>(sig), std::istreambuf_iterator<char>());
+            launcher::check_launcher_json(text, signature, launcher_release_public_key);
             logging::write(logging::Level::info, logging::Channel::launcher, L"Using local launcher config: " + path.wstring());
             return parse_config(text);
         } catch (const std::exception& exception) {
@@ -409,6 +414,14 @@ std::optional<Config> fetch_config(bool prereleases) {
         if (manifest == assets.end()) fail("The release has no launcher.json asset");
         std::string json;
         http_get(manifest->second, max_config_bytes, 8000, [&](const char* data, DWORD count) { json.append(data, count); });
+        // Signed offline with the release key, so a changed release asset alone cannot point
+        // the launcher at other files. A build without a key built in uses it unsigned.
+        std::optional<std::string> signature;
+        if (const auto found = assets.find("launcher.json.minisig"); found != assets.end() && *launcher_release_public_key) {
+            signature.emplace();
+            http_get(found->second, 4096, 8000, [&](const char* data, DWORD count) { signature->append(data, count); });
+        }
+        launcher::check_launcher_json(json, signature, launcher_release_public_key);
         auto config = parse_config(json);
         for (auto* file : {&config.launcher, &config.runtime, &config.depot_downloader, &config.server}) {
             if (!file->url.starts_with(L"asset:")) continue;

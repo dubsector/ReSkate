@@ -260,6 +260,7 @@ Useful launcher flags:
 | `DINGOSDK_VERSION` | `0.0.0` | version stamped into the binaries |
 | `DINGOSDK_LAUNCHER_AUTO_UPDATE` | `OFF` | let the launcher replace itself and `ReSkate.dll`, and the server replace itself (release builds) |
 | `DINGOSDK_RELEASE_REPO` | `Dingo-Shenanigans/ReSkate` | public GitHub repository whose latest release carries `launcher.json` and the files it pins |
+| `DINGOSDK_RELEASE_PUBLIC_KEY` | empty | minisign public key that signs each release's `launcher.json`; required with auto-update, see [contrib/release-signing.md](contrib/release-signing.md) |
 | `DINGOSDK_CRASH_REPORT_URL` | the project's endpoint | Sentry minidump endpoint URL; empty turns crash uploads off |
 | `DINGOSDK_TEST_GAME_ROOT` | empty | a Skate folder, for the tests that read real game data |
 
@@ -327,8 +328,8 @@ image CDN (`dingo-dev-assets.akamaized.net`), which only downloads images.
 
 ## Third-party code
 
-ReSkate uses Dear ImGui, Microsoft Detours, RapidJSON, spdlog, SQLite, LZ4, Zstandard, miniz, bcdec and
-Valve's networking headers, and the Montserrat and Permanent Marker fonts. Versions, licenses and local
+ReSkate uses Dear ImGui, Microsoft Detours, RapidJSON, spdlog, SQLite, LZ4, Zstandard, miniz, bcdec,
+Monocypher and Valve's networking headers, and the Montserrat and Permanent Marker fonts. Versions, licenses and local
 patches are in [External/README.md](External/README.md). Every release ships their license files in
 `licenses/`.
 

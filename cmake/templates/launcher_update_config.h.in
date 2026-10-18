@@ -5,4 +5,8 @@ inline constexpr bool launcher_binary_updates = @launcher_binary_updates@;
 
 // Public GitHub releases source ("owner/repo"): launcher.json in its latest release.
 inline constexpr wchar_t launcher_release_repo[] = L"@launcher_release_repo@";
+
+// minisign public key that signs launcher.json (launcher.json.minisig). Empty in a local
+// build without one: the config is then used unsigned.
+inline constexpr char launcher_release_public_key[] = "@launcher_release_public_key@";
 }

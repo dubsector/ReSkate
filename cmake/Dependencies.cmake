@@ -37,6 +37,10 @@ set_target_properties(dingosdk_miniz PROPERTIES FOLDER "Dependencies")
 add_library(dingosdk_lz4 STATIC External/lz4/lz4.c)
 target_include_directories(dingosdk_lz4 SYSTEM PUBLIC External/lz4)
 set_target_properties(dingosdk_lz4 PROPERTIES FOLDER "Dependencies")
+# Ed25519 and BLAKE2b, for the minisign signature on a release's launcher.json.
+add_library(dingosdk_monocypher STATIC External/monocypher/monocypher.c External/monocypher/monocypher-ed25519.c)
+target_include_directories(dingosdk_monocypher SYSTEM PUBLIC External/monocypher)
+set_target_properties(dingosdk_monocypher PROPERTIES FOLDER "Dependencies")
 file(GLOB zstd_sources CONFIGURE_DEPENDS External/zstd/lib/common/*.c
     External/zstd/lib/compress/*.c External/zstd/lib/decompress/*.c)
 add_library(dingosdk_zstd STATIC ${zstd_sources})

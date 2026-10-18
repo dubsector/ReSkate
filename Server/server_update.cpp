@@ -6,6 +6,7 @@
 #else
 #include "server_release.h"
 #include "launcher_update_config.h"
+#include "Engine/Core/Platform/release_signature.h"
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/wait.h>
@@ -207,6 +208,10 @@ UpdateCheck check_for_update() {
             std::ifstream input(local, std::ios::binary);
             const std::string text{std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
             if (!input && !input.eof()) throw std::runtime_error(std::string("cannot read ") + local);
+            std::optional<std::string> signature;
+            if (std::ifstream sig(std::string(local) + ".minisig", std::ios::binary); sig)
+                signature.emplace(std::istreambuf_iterator<char>(sig), std::istreambuf_iterator<char>());
+            launcher::check_launcher_json(text, signature, launcher_update::launcher_release_public_key);
             found = parse_linux_release(text, {});
         } else {
             std::string repo;
@@ -218,7 +223,14 @@ UpdateCheck check_for_update() {
                 check.problem = "the latest release has no launcher.json";
                 return check;
             }
-            found = parse_linux_release(https_text(manifest->second, 256 * 1024), assets);
+            const auto text = https_text(manifest->second, 256 * 1024);
+            // Signed with the release key, as the launcher checks it (Launcher/updater.cpp).
+            std::optional<std::string> signature;
+            if (const auto sig = assets.find("launcher.json.minisig");
+                sig != assets.end() && *launcher_update::launcher_release_public_key)
+                signature = https_text(sig->second, 4096);
+            launcher::check_launcher_json(text, signature, launcher_update::launcher_release_public_key);
+            found = parse_linux_release(text, assets);
         }
         if (!found) {
             check.problem = "the latest release has no Linux server";

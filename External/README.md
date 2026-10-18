@@ -12,6 +12,7 @@
 | bcdec | `80859ed3b7afb1c527a2a99d70c61457bea72d0c` | MIT or Unlicense | [iOrange/bcdec](https://github.com/iOrange/bcdec/tree/80859ed3b7afb1c527a2a99d70c61457bea72d0c) |
 | LZ4 | `1.10.0` | BSD-2-Clause | [lz4/lz4](https://github.com/lz4/lz4/releases/tag/v1.10.0) |
 | Zstandard | `1.5.7` | BSD-3-Clause (dual-licensed with GPLv2; used under BSD) | [facebook/zstd](https://github.com/facebook/zstd/releases/tag/v1.5.7) |
+| Monocypher | `4.0.2` | BSD-2-Clause or CC0-1.0 | [LoupVaillant/Monocypher](https://github.com/LoupVaillant/Monocypher/releases/tag/4.0.2) |
 | Montserrat font | `fonts/Montserrat-*.ttf` | SIL Open Font License 1.1 | [JulietaUla/Montserrat](https://github.com/JulietaUla/Montserrat) |
 | Permanent Marker font | `fonts/PermanentMarker-Regular.ttf` | Apache 2.0 | [Google Fonts](https://fonts.google.com/specimen/Permanent+Marker) |
 
@@ -68,6 +69,11 @@ Zstandard 1.5.7 (`zstd/`) is the library's common, compress and decompress sourc
 support or assembly, for multiplayer packet and game archive compression. It is not
 yet hashed in `manifest.json`. Packages include `licenses/zstd-LICENSE.txt` (the
 BSD license; `COPYING` is the alternative GPLv2 grant).
+
+Monocypher 4.0.2 (`monocypher/`) checks the minisign signature on a release's `launcher.json`
+(BLAKE2b and Ed25519, from `monocypher.c` and the optional `monocypher-ed25519.c`). The files
+are the unmodified release tarball's, which differs from the git tag only in the version line
+at the top of each source. Keep `monocypher/LICENCE.md` with binary packages.
 
 miniz supplies the ZIP reader for the launcher's downloads (DepotDownloader, the
 content cache, Thunderstore mods) and the dedicated server's updates.

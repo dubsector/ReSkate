@@ -7,7 +7,9 @@ endif()
 add_library(dingosdk_launcher_support STATIC
     Engine/Core/Platform/launcher_support.cpp
     Engine/Core/Platform/launcher_pe.cpp
+    Engine/Core/Platform/release_signature.cpp
     $<$<BOOL:${WIN32}>:Engine/Core/Platform/launcher_injection.cpp>)
+target_link_libraries(dingosdk_launcher_support PRIVATE dingosdk_monocypher)
 
 if(WIN32)
     target_link_libraries(dingosdk_launcher_support PUBLIC bcrypt)

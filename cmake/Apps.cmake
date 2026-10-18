@@ -194,7 +194,18 @@ set(launcher_release_repo "${DINGOSDK_RELEASE_REPO}")
 if(NOT launcher_release_repo MATCHES "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
     message(FATAL_ERROR "DINGOSDK_RELEASE_REPO must be owner/repo")
 endif()
+# The minisign public key (the base64 line of its .pub file) that signs each release's
+# launcher.json. With a key, the launcher and server refuse an unsigned or badly signed
+# config; a build that replaces itself must have one.
+set(DINGOSDK_RELEASE_PUBLIC_KEY "" CACHE STRING "minisign public key that signs launcher.json in the releases")
+set(launcher_release_public_key "${DINGOSDK_RELEASE_PUBLIC_KEY}")
+if(launcher_release_public_key AND NOT launcher_release_public_key MATCHES "^RW[A-Za-z0-9+/]+$")
+    message(FATAL_ERROR "DINGOSDK_RELEASE_PUBLIC_KEY must be the base64 line of a minisign public key (RW...)")
+endif()
 if(DINGOSDK_LAUNCHER_AUTO_UPDATE)
+    if(NOT launcher_release_public_key)
+        message(FATAL_ERROR "DINGOSDK_LAUNCHER_AUTO_UPDATE needs DINGOSDK_RELEASE_PUBLIC_KEY to check launcher.json")
+    endif()
     set(launcher_binary_updates true)
 else()
     set(launcher_binary_updates false)
