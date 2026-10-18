@@ -307,6 +307,9 @@ Config parse_config(std::string_view text) {
     config.launcher = parse_file(root, "launcher", false);
     config.runtime = parse_file(root, "runtime", false);
     config.depot_downloader = parse_file(root, "depot_downloader", true);
+    config.depot_downloader_exe_sha256 = root.at("depot_downloader").at("exe_sha256").string();
+    if (!is_sha256(config.depot_downloader_exe_sha256))
+        fail("Launcher config \"depot_downloader.exe_sha256\" must be 64 lowercase hex digits");
     config.server = parse_file(root, "server", false);
     if (!config.server.url.empty()) {
         config.server_exe_sha256 = root.at("server").at("exe_sha256").string();
@@ -711,11 +714,20 @@ void remove_replaced_files(const fs::path& directory) noexcept {
     }
 }
 
-fs::path ensure_depot_downloader(const RemoteFile& file, const Progress& progress) {
+fs::path ensure_depot_downloader(const RemoteFile& file, std::string_view exe_sha256, const Progress& progress) {
+    if (!is_sha256(exe_sha256)) fail("The launcher config pins no DepotDownloader.exe");
     const auto directory = local_app_data() / L"ReSkate" / L"tools" / L"DepotDownloader" / widen(file.sha256.substr(0, 16));
     const auto executable = directory / L"DepotDownloader.exe";
     std::error_code error;
-    if (fs::is_regular_file(executable, error)) return executable;
+    // Hashed on every run: the folder is the user's to write, so a copy swapped or
+    // damaged since it was unpacked is fetched again rather than started.
+    if (fs::is_regular_file(executable, error)) {
+        if (launcher::sha256_file(executable) == exe_sha256) return executable;
+        logging::write(logging::Level::warning, logging::Channel::launcher,
+            "DepotDownloader.exe does not match the launcher config; downloading it again");
+        if (!DeleteFileW(executable.c_str()))
+            fail(std::format("Cannot remove the mismatched DepotDownloader.exe (Windows error {})", GetLastError()));
+    }
     fs::create_directories(directory);
     const auto archive = directory / L"DepotDownloader.zip";
     const auto verified = download_verified(archive, file, progress);
@@ -728,6 +740,10 @@ fs::path ensure_depot_downloader(const RemoteFile& file, const Progress& progres
         throw;
     }
     DeleteFileW(verified.c_str());
+    if (launcher::sha256_file(unpacked) != exe_sha256) {
+        DeleteFileW(unpacked.c_str());
+        fail("DepotDownloader.exe in the archive does not match the SHA-256 in the launcher config");
+    }
     if (!MoveFileExW(unpacked.c_str(), executable.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
         fail(std::format("Cannot install DepotDownloader (Windows error {})", GetLastError()));
     logging::write(logging::Level::info, logging::Channel::launcher, L"DepotDownloader ready: " + executable.wstring());

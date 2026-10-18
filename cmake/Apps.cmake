@@ -28,6 +28,11 @@ if(DINGOSDK_BUILD_LAUNCHER_TESTS AND WIN32)
     target_link_libraries(dingosdk_mod_manager_tests PRIVATE dingosdk_mod_list dingosdk_launcher_support dingosdk_logging dingosdk_json
         dingosdk_miniz dingosdk_zstd winhttp shell32)
     add_test(NAME launcher_mod_manager COMMAND dingosdk_mod_manager_tests)
+    add_executable(dingosdk_updater_tests Launcher/Test/updater_tests.cpp Launcher/updater.cpp)
+    target_link_libraries(dingosdk_updater_tests PRIVATE dingosdk_launcher_support dingosdk_logging dingosdk_json
+        dingosdk_miniz winhttp shell32)
+    target_include_directories(dingosdk_updater_tests PRIVATE "${PROJECT_SOURCE_DIR}")
+    add_test(NAME launcher_updater COMMAND dingosdk_updater_tests)
     add_executable(dingosdk_thunderstore_tests Launcher/Test/thunderstore_tests.cpp Launcher/thunderstore.cpp)
     target_link_libraries(dingosdk_thunderstore_tests PRIVATE dingosdk_json dingosdk_miniz)
     target_include_directories(dingosdk_thunderstore_tests PRIVATE "${PROJECT_SOURCE_DIR}")

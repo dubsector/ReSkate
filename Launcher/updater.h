@@ -34,6 +34,8 @@ struct Config {
     RemoteFile launcher;
     RemoteFile runtime;
     RemoteFile depot_downloader;
+    // SHA-256 of the DepotDownloader.exe inside its zip, checked before every run.
+    std::string depot_downloader_exe_sha256;
     GameBuild game;
     // The dedicated server's zip, and the SHA-256 of the ReSkateServer.exe inside
     // it: a server whose own exe differs is out of date. Empty when not published.
@@ -104,8 +106,10 @@ std::string archive_entry_sha256(const std::filesystem::path& archive, const cha
 // Deletes the *.update-old files a previous install_archive left behind.
 void remove_replaced_files(const std::filesystem::path& directory) noexcept;
 
-// Downloads and unpacks DepotDownloader under %LOCALAPPDATA%\ReSkate\tools.
-std::filesystem::path ensure_depot_downloader(const RemoteFile& file, const Progress& progress = {});
+// Downloads and unpacks DepotDownloader under %LOCALAPPDATA%\ReSkate\tools. A copy already
+// there is hashed on every call and replaced when it no longer matches `exe_sha256`.
+std::filesystem::path ensure_depot_downloader(const RemoteFile& file, std::string_view exe_sha256,
+                                              const Progress& progress = {});
 // How DepotDownloader signs in to Steam. An empty username shows a QR code.
 struct SteamLogin {
     std::string username;

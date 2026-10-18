@@ -399,7 +399,7 @@ void Launcher::run_download(bool validate) {
     timing.tag("mode", validate ? "verify" : "download");
     set(Phase::downloading, "Preparing Steam download", {}, 0);
     const auto depot_downloader = update::ensure_depot_downloader(config->depot_downloader,
-        progress_for("DepotDownloader"));
+        config->depot_downloader_exe_sha256, progress_for("DepotDownloader"));
     set(Phase::downloading, "Connecting to Steam");
     DepotOutput output;
     // DepotDownloader's last lines, for the log when the download fails: they say why (the
